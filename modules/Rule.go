@@ -23,8 +23,8 @@ func (r *Rule) SetValue(value string) {
 	r.value = value
 }
 
-func NewRule(id uint32, value string) Rule {
-	return Rule{id, value}
+func NewRule(id uint32, value string) *Rule {
+	return &Rule{id, value}
 }
 
 func (r *Rule) isEqual(arg string) bool {

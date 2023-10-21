@@ -56,25 +56,55 @@ func NewRuleSet(id uint32, attribute string) RuleSet {
 	}
 }
 
+func NewRuleSetWithRules(id uint32, attribute string, rules []*Rule) RuleSet {
+	////Bitmap length must multiple of 8
+	var length int
+	if len(rules)%8 == 0 {
+		length = len(rules)
+	} else {
+		length = len(rules) + (8 - len(rules)%8)
+	}
+	//intialize bitmap with length of the rules
+	ruling := bitmap.FromBytes(make([]byte, length))
+
+	return RuleSet{
+		id,
+		attribute,
+		ruling,
+		rules,
+		0,
+	}
+}
+
 func (rs *RuleSet) AddNewRuleAttr(id uint32, value string) {
 	rule := NewRule(id, value)
-	rs.rules = append(rs.rules, &rule)
+	rs.rules = append(rs.rules, rule)
 	rs.size++
 	rs.ruling.Grow(rs.size)
 }
 
 func (rs *RuleSet) AddNewRule(arg *Rule) {
 	rule := NewRule(arg.GetId(), arg.GetValue())
-	rs.rules = append(rs.rules, &rule)
+	rs.rules = append(rs.rules, rule)
 	rs.size++
 	rs.ruling.Grow(rs.size)
 }
 
 func (rs *RuleSet) FindIndexOfRule(value string) (uint32, error) {
+	for i := 0; i < len(rs.rules); i++ {
+		if rs.rules[i].GetValue() == value {
+			return uint32(i), nil
+		}
+	}
+
+	return 0, errors.New(errors_enum.VALUE_NOT_FOUND_IN_ARRAY)
+}
+
+func (rs *RuleSet) FindIdOfRule(value string) (uint32, error) {
 	var i uint32
 	for i = 0; i < rs.size; i++ {
 		if rs.rules[i].GetValue() == value {
-			return i, nil
+			return rs.rules[i].GetId(), nil
 		}
 	}
 
@@ -82,6 +112,7 @@ func (rs *RuleSet) FindIndexOfRule(value string) (uint32, error) {
 }
 
 func (rs *RuleSet) SetRuleToTrue(value string) error {
+
 	i, err := rs.FindIndexOfRule(value)
 
 	if err != nil {

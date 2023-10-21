@@ -7,8 +7,8 @@ import (
 )
 
 type User struct {
-	id     uint32 `json:id`
-	name   string `json:name`
+	id     uint32
+	name   string
 	ruling []bitmap.Bitmap
 	size   uint32
 }
